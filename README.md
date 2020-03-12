@@ -70,6 +70,14 @@ drwxr-xr-x. 87 root root 8192 Mar 12 11:47 ..
 -rw-------. 1  root root 3326 Mar 12 11:59 user_ca
 -rw-r--r--. 1  root root  733 Mar 12 11:59 user_ca.pub
 ```
+* -q
+  * This suppresses all output except for that which is necessary.
+* -b 4096
+  * Creates a key pair where each key is 4096 bits in length
+* -f host_ca
+  * The name of our certification authority’s host key pair.
+  * /etc/ssh_ca/user_ca will contain the private key.
+  * /etc/ssh_ca/user_ca.pub will contain the public key.
 
 ## Sign the server's RSA key
 ### copy key to CA
@@ -125,12 +133,12 @@ drwxr-xr-x 70 root root 4096 Mar 12 02:42 ..
 -rw-------  1 root root 3369 Mar 12 02:56 user_ca
 -rw-r--r--  1 root root  734 Mar 12 02:56 user_ca.pub
 ```
-Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to `the server.netdef.org:/etc/ssh/`.  
+### tell the SSH daemon about the certificate.
+Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to `server.netdef.org:/etc/ssh/`.  
 Copy `/etc/ssh_ca/user_ca.pub` to the `server.netdef.org:/etc/ssh/`.  
 As a destination choose `/etc/ssh/`for both files.  
 
-### tell the SSH daemon about the certificate.
-Add the configuration lines to the file `/etc/ssh/sshd_config`.
+Add the following lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the certificate.
 
 ```bash
 [root@ca1:~]# echo "
@@ -142,8 +150,86 @@ TrustedUserCAKeys /etc/ssh/user_ca.pub " >> /etc/ssh/sshd_config
 ```
 Options explanation:
 * HostCertificate
-  * The server uses this certificate 
+  * The server uses this certificate to identify its-self as a trusted server.
 
 * TrustedUserCAKeys
   * This forces the server to trust all certifactes the are signed with the user_ca key.
 
+## Sign the client's RSA key
+### copy key to CA
+```bash
+[root@client:~]# ls -al ~/.ssh
+total 24
+drwxr-xr-x  2 pi   pi   4096 Mar 12 11:11 .
+drwxr-xr-x 19 pi   pi   4096 Mar 12 09:21 ..
+-rw-------  1 pi   pi   1675 Feb 20 14:19 id_rsa
+-rw-r--r--  1 pi   pi    395 Feb 20 14:19 id_rsa.pub
+```
+
+Copy `~/.ssh/id_rsa.pub` to the CA server.
+
+### sign key
+```bash
+[root@ca:~]# ssh-keygen -s user_ca \
+                        -I client_name \
+                        -n root \
+                        -V +24h \
+                        /etc/ssh_ca/id_rsa.pub
+Signed user key /etc/ssh_ca/id_rsa-cert.pub: id "client_name" serial 0 for root valid from 2020-03-12T08:39:00 to 2020-03-13T08:40:37
+```
+Options explanation:
+* -s user_ca
+  * The file name of the host private key to use for signing.
+* -I client_name
+  * The key identifier to include in the certificate.
+* -n root
+  * The principal names to include in the certificate.
+  * For client certificates this is a list of all users that the system is allowed to log in.
+* -V +24h
+  * The validity period.
+  * For client certificates, you’ll probably want them short lived.
+  * This setting sets the validity period from now until 24 hours.
+  * One an SSH session is authenticated the certificate can safely expire without impacting the established session.
+* /etc/ssh_ca/id_rsa.pub
+  * The name of the host RSA public key to sign.
+  * Our signed host key (certificate) will be /etc/ssh_ca/ssh_host_rsa_key-cert.pub.
+
+### copy certifacte from the CA to the client
+```bash
+[root@ca:~]# ls -al /etc/ssh_ca
+total 48
+drwx------  2 root root 4096 Mar 12 04:32 .
+drwxr-xr-x 70 root root 4096 Mar 12 02:42 ..
+-rw-------  1 root root 3369 Mar 12 02:43 host_ca
+-rw-r--r--  1 root root  734 Mar 12 02:43 host_ca.pub
+-rw-r--r--  1 root root  381 Mar 12 04:31 id_rsa.pub
+-rw-r--r--  1 root root 2064 Mar 12 04:14 id_rsa-cert.pub
+-rw-------  1 root root 3369 Mar 12 02:56 user_ca
+-rw-r--r--  1 root root  734 Mar 12 02:56 user_ca.pub
+```
+
+### tell the SSH daemon about the certificate.
+There are two different options to tell the daemon about the certificate: `global` or `user based`.
+
+#### global
+The certificate is valid for each user on the client.  
+Copy `/etc/ssh_ca/id_rsa-cert.pub` back to `client:/etc/ssh/`.  
+Copy `/etc/ssh_ca/host_ca.pub` to the `client:/etc/ssh/`.  
+As a destination choose `/etc/ssh/`for both files.  
+
+Add the following lines to the file `/etc/ssh/ssh_known_hosts` to tell the SSH daemon about the certificate.
+
+```bash
+[root@client:~]# echo "@cert-authority *.netdef.org `cat /etc/ssh/user_ca.pub`" >> /etc/ssh/ssh_known_hosts
+```
+#### user based
+The certificate is valid for one specific user on the client.  
+Copy `/etc/ssh_ca/id_rsa-cert.pub` back to `client:~/.ssh/`.  
+Copy `/etc/ssh_ca/host_ca.pub` to the `client:~/.ssh/`.  
+As a destination choose `~/.ssh/`for both files.  
+
+Add the following lines to the file `~/.ssh/known_hosts` to tell the SSH daemon about the certificate.
+
+```bash
+[root@client:~]# echo "@cert-authority *.netdef.org `cat /etc/ssh/user_ca.pub`" >> ~/.ssh/ssh_known_hosts
+```
