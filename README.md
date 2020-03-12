@@ -112,19 +112,33 @@ Options explanation:
   * The name of the host RSA public key to sign.
   * Our signed host key (certificate) will be /etc/ssh_ca/ssh_host_rsa_key-cert.pub.
 
-### copy certifacte from CA to server
-Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to the server.  
-Copy `/etc/ssh_ca/user_ca.pub` to the server.  
+### copy certifacte from the CA to server.netdef.org
+```bash
+[root@ca:~]# ls -al /etc/ssh_ca
+total 48
+drwx------  2 root root 4096 Mar 12 04:32 .
+drwxr-xr-x 70 root root 4096 Mar 12 02:42 ..
+-rw-------  1 root root 3369 Mar 12 02:43 host_ca
+-rw-r--r--  1 root root  734 Mar 12 02:43 host_ca.pub
+-rw-r--r--  1 root root  381 Mar 12 04:31 ssh_host_rsa_key.pub
+-rw-r--r--  1 root root 2064 Mar 12 04:14 ssh_host_rsa_key-cert.pub
+-rw-------  1 root root 3369 Mar 12 02:56 user_ca
+-rw-r--r--  1 root root  734 Mar 12 02:56 user_ca.pub
+```
+Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to `the server.netdef.org:/etc/ssh/`.  
+Copy `/etc/ssh_ca/user_ca.pub` to the `server.netdef.org:/etc/ssh/`.  
 As a destination choose `/etc/ssh/`for both files.  
 
 ### tell the SSH daemon about the certificate.
-Add the lines to the file `/etc/ssh/sshd_config`.
+Add the configuration lines to the file `/etc/ssh/sshd_config`.
+
 ```bash
+[root@ca1:~]# echo "
 ### Host certificate
 HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub
 
-### User CA certificate 
-TrustedUserCAKeys /etc/ssh/user_ca.pub 
+### User CA certificate
+TrustedUserCAKeys /etc/ssh/user_ca.pub " >> /etc/ssh/sshd_config
 ```
 Options explanation:
 * HostCertificate
