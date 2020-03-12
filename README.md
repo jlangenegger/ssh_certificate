@@ -141,7 +141,7 @@ As a destination choose `/etc/ssh/`for both files.
 Add the config lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the certificate.
 
 ```bash
-[root@ca1:~]# echo "
+[root@ca:~]# echo "
 ### Host certificate
 HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub
 
