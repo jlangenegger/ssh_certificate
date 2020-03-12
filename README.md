@@ -113,9 +113,9 @@ Options explanation:
   * Our signed host key (certificate) will be /etc/ssh_ca/ssh_host_rsa_key-cert.pub.
 
 ### copy certifacte from CA to server
-Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to the server. 
-Copy `/etc/ssh_ca/user_ca.pub` to the server.
-As a destination choose `/etc/ssh/`for both files.
+Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to the server.  
+Copy `/etc/ssh_ca/user_ca.pub` to the server.  
+As a destination choose `/etc/ssh/`for both files.  
 
 ### tell the SSH daemon about the certificate.
 Add the lines to the file `/etc/ssh/sshd_config`.
