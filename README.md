@@ -220,7 +220,7 @@ As a destination choose `/etc/ssh/`for both files.
 Add the following lines to the file `/etc/ssh/ssh_known_hosts` to tell the SSH daemon about the certificate.
 
 ```bash
-[root@client:~]# echo "@cert-authority *.netdef.org `cat /etc/ssh/user_ca.pub`" >> /etc/ssh/ssh_known_hosts
+[root@client:~]# echo "@cert-authority *.netdef.org `cat /etc/ssh/host_ca.pub`" >> /etc/ssh/ssh_known_hosts
 ```
 #### user based
 The certificate is valid for one specific user on the client.  
@@ -231,7 +231,7 @@ As a destination choose `~/.ssh/`for both files.
 Add the configuration line to the file `~/.ssh/known_hosts` to tell the SSH daemon about the certificate.
 
 ```bash
-[root@client:~]# echo "@cert-authority *.netdef.org `cat ~/.ssh/user_ca.pub`" >> ~/.ssh/ssh_known_hosts
+[root@client:~]# echo "@cert-authority *.netdef.org `cat ~/.ssh/host_ca.pub`" >> ~/.ssh/known_hosts
 ```
 
 ## Trouble shooting
