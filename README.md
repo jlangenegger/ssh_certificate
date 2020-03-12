@@ -25,7 +25,7 @@ For the purposes of this document, let’s consider three systems:
 ## Prepare CA
 We’re going to need to set up certificates based on both the host and user keys.
 
-On ca, use ssh-keygen to create a host CA key pair.
+On CA, use ssh-keygen to create a host CA key pair.
 
 ### host_ca
 Use ssh-keygen to create a host CA key pair.
@@ -80,7 +80,7 @@ drwxr-xr-x. 87 root root 8192 Mar 12 11:47 ..
   * /etc/ssh_ca/user_ca.pub will contain the public key.
 
 ## Sign the server's RSA key
-### copy key to CA
+### copy server's RSA key to CA
 ```bash
 [root@server:~]# ls /etc/ssh/ssh_host*
 -rw------- 1 root root  513 Sep 26 12:47 /etc/ssh/ssh_host_ecdsa_key
@@ -91,7 +91,7 @@ drwxr-xr-x. 87 root root 8192 Mar 12 11:47 ..
 
 Copy `/etc/ssh/ssh_host_rsa_key.pub` to the CA server.
 
-### sign key
+### sign server's RSA key
 ```bash
 [root@ca:~]# ssh-keygen -s host_ca \
                         -I server_name \
@@ -117,10 +117,10 @@ Options explanation:
   * For host certificates, you’ll probably want them pretty long lived.
   * This setting sets the validity period from now until 52 weeks hence.
 * /etc/ssh_ca/ssh_host_rsa_key.pub
-  * The name of the host RSA public key to sign.
+  * The path to the host RSA public key to sign.
   * Our signed host key (certificate) will be /etc/ssh_ca/ssh_host_rsa_key-cert.pub.
 
-### copy certifacte from the CA to server.netdef.org
+### copy host's certifacte from the CA to server.netdef.org
 ```bash
 [root@ca:~]# ls -al /etc/ssh_ca
 total 48
@@ -138,7 +138,7 @@ Copy `/etc/ssh_ca/ssh_host_rsa_key-cert.pub` back to `server.netdef.org:/etc/ssh
 Copy `/etc/ssh_ca/user_ca.pub` to the `server.netdef.org:/etc/ssh/`.  
 As a destination choose `/etc/ssh/`for both files.  
 
-Add the following lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the certificate.
+Add the config lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the certificate.
 
 ```bash
 [root@ca1:~]# echo "
@@ -146,7 +146,7 @@ Add the following lines to the file `/etc/ssh/sshd_config` to tell the SSH daemo
 HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub
 
 ### User CA certificate
-TrustedUserCAKeys /etc/ssh/user_ca.pub " >> /etc/ssh/sshd_config
+TrustedUserCAKeys /etc/ssh/user_ca.pub" >> /etc/ssh/sshd_config
 ```
 Options explanation:
 * HostCertificate
@@ -156,7 +156,7 @@ Options explanation:
   * This forces the server to trust all certifactes the are signed with the user_ca key.
 
 ## Sign the client's RSA key
-### copy key to CA
+### copy client's RSA key to CA
 ```bash
 [root@client:~]# ls -al ~/.ssh
 total 24
@@ -168,7 +168,7 @@ drwxr-xr-x 19 pi   pi   4096 Mar 12 09:21 ..
 
 Copy `~/.ssh/id_rsa.pub` to the CA server.
 
-### sign key
+### sign client's RSA key
 ```bash
 [root@ca:~]# ssh-keygen -s user_ca \
                         -I client_name \
@@ -194,7 +194,7 @@ Options explanation:
   * The name of the host RSA public key to sign.
   * Our signed host key (certificate) will be /etc/ssh_ca/ssh_host_rsa_key-cert.pub.
 
-### copy certifacte from the CA to the client
+### copy client's certifacte from the CA to the client
 ```bash
 [root@ca:~]# ls -al /etc/ssh_ca
 total 48
@@ -213,8 +213,8 @@ There are two different options to tell the daemon about the certificate: `globa
 
 #### global
 The certificate is valid for each user on the client.  
-Copy `/etc/ssh_ca/id_rsa-cert.pub` back to `client:/etc/ssh/`.  
-Copy `/etc/ssh_ca/host_ca.pub` to the `client:/etc/ssh/`.  
+Copy `/etc/ssh_ca/id_rsa-cert.pub` back to `/etc/ssh/`.  
+Copy `/etc/ssh_ca/host_ca.pub` to the `/etc/ssh/`.  
 As a destination choose `/etc/ssh/`for both files.  
 
 Add the following lines to the file `/etc/ssh/ssh_known_hosts` to tell the SSH daemon about the certificate.
@@ -224,12 +224,12 @@ Add the following lines to the file `/etc/ssh/ssh_known_hosts` to tell the SSH d
 ```
 #### user based
 The certificate is valid for one specific user on the client.  
-Copy `/etc/ssh_ca/id_rsa-cert.pub` back to `client:~/.ssh/`.  
-Copy `/etc/ssh_ca/host_ca.pub` to the `client:~/.ssh/`.  
+Copy `/etc/ssh_ca/id_rsa-cert.pub` back to `~/.ssh/`.  
+Copy `/etc/ssh_ca/host_ca.pub` to the `~/.ssh/`.  
 As a destination choose `~/.ssh/`for both files.  
 
-Add the following lines to the file `~/.ssh/known_hosts` to tell the SSH daemon about the certificate.
+Add the configuration line to the file `~/.ssh/known_hosts` to tell the SSH daemon about the certificate.
 
 ```bash
-[root@client:~]# echo "@cert-authority *.netdef.org `cat /etc/ssh/user_ca.pub`" >> ~/.ssh/ssh_known_hosts
+[root@client:~]# echo "@cert-authority *.netdef.org `cat ~/.ssh/user_ca.pub`" >> ~/.ssh/ssh_known_hosts
 ```
