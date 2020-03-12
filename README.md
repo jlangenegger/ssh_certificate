@@ -233,3 +233,29 @@ Add the configuration line to the file `~/.ssh/known_hosts` to tell the SSH daem
 ```bash
 [root@client:~]# echo "@cert-authority *.netdef.org `cat ~/.ssh/user_ca.pub`" >> ~/.ssh/ssh_known_hosts
 ```
+
+## Trouble shooting
+### read certificate
+```bash
+[root@ca:~]# ssh-keygen -L -f ~/.ssh/id_rsa-cert.pub
+/root/.ssh/id_rsa-cert.pub:
+        Type: ssh-rsa-cert-v01@openssh.com user certificate
+        Public key: RSA-CERT SHA256:I7H1vCxXFUihg6LjKheeXrg1NPr0Ogiz6HeUKUBwXCg
+        Signing CA: RSA SHA256:nS3AVpov/OnlpOfAbLTeLDa38NVXyRG/PFpo6jxqwgQ
+        Key ID: "user_admin"
+        Serial: 0
+        Valid: forever
+        Principals:
+                root
+        Critical Options: (none)
+        Extensions:
+                permit-X11-forwarding
+                permit-agent-forwarding
+                permit-port-forwarding
+                permit-pty
+                permit-user-rc
+```
+### log
+```bash
+[root@server:~]# tail -f /var/log/auth.log
+```
