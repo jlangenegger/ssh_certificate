@@ -234,6 +234,23 @@ Add the configuration line to the file `~/.ssh/known_hosts` to tell the SSH daem
 [root@client:~]# echo "@cert-authority *.netdef.org `cat ~/.ssh/host_ca.pub`" >> ~/.ssh/known_hosts
 ```
 
+## Revoke Certificate
+### create new revoked keys list
+```bash
+[root@server:~]# ssh-keygen -kf  /etc/ssh/revoked_keys -z 1 ~/id_rsa.pub
+```
+
+### add new revoked key
+```bash
+[root@server:~]# ssh-keygen -ukf  /etc/ssh/revoked_keys ~/id_rsa.pub
+```
+
+### test revoked key
+```bash
+[root@server:~]# ssh-keygen -Qf /etc/ssh/revoked_keys ~/id_rsa.pub
+```
+
+
 ## Trouble shooting
 ### read certificate
 ```bash
