@@ -235,17 +235,28 @@ Add the configuration line to the file `~/.ssh/known_hosts` to tell the SSH daem
 ```
 
 ## Revoke Certificate
+To revoke a SSH key of a client, the key needs to be added to the list of revoked_keys.  
+Unfortunately, this needs to be done on each and every server!
 ### create new revoked keys list
+This command creates a new revoked_keys list.
 ```bash
-[root@server:~]# ssh-keygen -kf  /etc/ssh/revoked_keys -z 1 ~/id_rsa.pub
+[root@server:~]# ssh-keygen -kf /etc/ssh/revoked_keys ~/id_rsa.pub
+```
+To tell the daemon about the new revoked_key list use the following command:
+```bash
+echo "
+### RevokedKeys List
+RevokedKeys /etc/ssh/revoked_keys" >> /etc/ssh/sshd_config
 ```
 
 ### add new revoked key
+If there is an exisiting revoked_keys list, one can add a key using the following command:
 ```bash
 [root@server:~]# ssh-keygen -ukf  /etc/ssh/revoked_keys ~/id_rsa.pub
 ```
 
 ### test revoked key
+To test if a keys has been revoked us the following command
 ```bash
 [root@server:~]# ssh-keygen -Qf /etc/ssh/revoked_keys ~/id_rsa.pub
 ```
