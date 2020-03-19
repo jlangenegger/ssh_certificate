@@ -234,9 +234,12 @@ Add the configuration line to the file `~/.ssh/known_hosts` to tell the SSH daem
 [root@client:~]# echo "@cert-authority *.netdef.org `cat ~/.ssh/host_ca.pub`" >> ~/.ssh/known_hosts
 ```
 
-## Revoke Certificate
+## Revoke SSH Key
 To revoke a SSH key of a client, the key needs to be added to the list of revoked_keys.  
+---
+**NOTE**
 Unfortunately, this needs to be done on each and every server!
+---
 ### create new revoked keys list
 This command creates a new revoked_keys list.
 ```bash
