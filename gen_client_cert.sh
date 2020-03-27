@@ -5,8 +5,8 @@ KEYNUM='1'
 DURATION='1'
 
 # flie names of the certifiactes
-USER_CERTIFICATE='user_ca'
-SERVER_CERTIFICATE='host_ca'
+USER_CERTIFICATE='../user_ca'
+SERVER_CERTIFICATE='../host_ca'
 
 print_usage() {
     echo "gen_client_cert [-u git_user] [-k key_number_in_git] [-d duration_of_certificates_in_days]"
