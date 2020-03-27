@@ -8,6 +8,8 @@ DURATION='1'
 USER_CERTIFICATE='../user_ca'
 SERVER_CERTIFICATE='../host_ca'
 
+DESTINATION_PATH='/home/ca1'
+
 print_usage() {
     echo "gen_client_cert [-u git_user] [-k key_number_in_git] [-d duration_of_certificates_in_days]"
 }
@@ -37,12 +39,15 @@ wget -q -O $USER https://github.com/$USER.keys | sed -n $KEYNUM'p'
 # sign key with USER_CERTIFICATE
 ssh-keygen -s $USER_CERTIFICATE -I $USER -n root -V +$DURATION'd' $USER
 
-# tar certificate as well as the host public key
-tar -cf "$USER.tar" "$USER-cert.pub" "$SERVER_CERTIFICATE.pub"
+# copy all the necessary files to a folder to tar
+rm "$USER"
+rm -rf $DESTINATION_PATH/$USER
+mkdir $DESTINATION_PATH/$USER
+mv $USER-cert.pub $DESTINATION_PATH/$USER
+cp $SERVER_CERTIFICATE.pub $DESTINATION_PATH/$USER
+cp "install_user_certificate.sh" $DESTINATION_PATH/$USER
+sed -i "3iCERT='$USER-cert.pub'" $DESTINATION_PATH/$USER/install_user_certificate.sh
 
-# move created key to key folder
-mv "$USER.tar" "/home/ca1/"
-
-# remove key, keep certificate
-rm "$USER-cert.pub"
-rm $USER
+# tar certificate as well as the host public key and script to install the key
+tar -cf "$DESTINATION_PATH/$USER.tar" -C $DESTINATION_PATH/$USER .
+rm -rf $DESTINATION_PATH/$USER
