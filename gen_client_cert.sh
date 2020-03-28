@@ -1,12 +1,12 @@
 #!/bin/bash
-
 USER=''
 KEYNUM='1'
 DURATION='1'
 
 # flie names of the certifiactes
-USER_CERTIFICATE='../user_ca'
-SERVER_CERTIFICATE='../host_ca'
+PATH_TO_CERTIFICATES='../'
+USER_CERTIFICATE='user_ca'
+HOST_CERTIFICATE='host_ca'
 
 DESTINATION_PATH='/home/ca1'
 
@@ -33,21 +33,34 @@ if [ "$USER" == "" ]; then
     exit 1;
 fi
 
+# prepare variables
+CERT_ID="$USER-$(date +%Y_%m_%d_%H_%M)"
+
 # load ssh key from github
-wget -q -O $USER https://github.com/$USER.keys | sed -n $KEYNUM'p'
+wget -q -O $CERT_ID https://github.com/$USER.keys | sed -n $KEYNUM'p'
 
 # sign key with USER_CERTIFICATE
-ssh-keygen -s $USER_CERTIFICATE -I $USER -n root -V +$DURATION'd' $USER
+ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $USER -n root -V +$DURATION'd' $CERT_ID
+
+# generate installation script for client
+echo "#!/bin/bash
+cp $CERT_ID-cert.pub ~/.ssh
+cp $HOST_CERTIFICATE.pub ~/.ssh
+echo \"@cert-authority *.netdef.org \`cat ~/.ssh/$HOST_CERTIFICATE.pub\`\" >> ~/.ssh/known_hosts
+echo \"To apply certificate: RESTART SSH DAEMON!\"" > install_user_certificate.sh
+
+
 
 # copy all the necessary files to a folder to tar
-rm "$USER"
-rm -rf $DESTINATION_PATH/$USER
-mkdir $DESTINATION_PATH/$USER
-mv $USER-cert.pub $DESTINATION_PATH/$USER
-cp $SERVER_CERTIFICATE.pub $DESTINATION_PATH/$USER
-cp "install_user_certificate.sh" $DESTINATION_PATH/$USER
-sed -i "3iCERT='$USER-cert.pub'" $DESTINATION_PATH/$USER/install_user_certificate.sh
+mkdir -p $DESTINATION_PATH/$USER/$CERT_ID
+cp "$PATH_TO_CERTIFICATES/$HOST_CERTIFICATE.pub" $DESTINATION_PATH/$USER/$CERT_ID
+cp "install_user_certificate.sh" $DESTINATION_PATH/$USER/$CERT_ID
+cp $CERT_ID-cert.pub $DESTINATION_PATH/$USER/$CERT_ID
 
 # tar certificate as well as the host public key and script to install the key
-tar -cf "$DESTINATION_PATH/$USER.tar" -C $DESTINATION_PATH/$USER .
-rm -rf $DESTINATION_PATH/$USER
+tar -cf "$DESTINATION_PATH/$USER/$CERT_ID.tar" -C $DESTINATION_PATH/$USER/$CERT_ID .
+
+# clean up
+rm -rf $DESTINATION_PATH/$USER/$CERT_ID
+rm install_user_certificate.sh
+rm $USER*
