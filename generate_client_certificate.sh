@@ -64,6 +64,7 @@ mkdir -p $DESTINATION_PATH/$USER/$CERT_ID
 cp "$PATH_TO_CERTIFICATES/$HOST_CERTIFICATE.pub" $DESTINATION_PATH/$USER/$CERT_ID
 cp "install_user_certificate.sh" $DESTINATION_PATH/$USER/$CERT_ID
 cp $CERT_ID-cert.pub $DESTINATION_PATH/$USER/$CERT_ID
+cp "README_client.md" "$DESTINATION_PATH/$USER/$CERT_ID/README.md"
 
 # tar certificate as well as the host public key and script to install the key
 tar -cf "$DESTINATION_PATH/$USER/$CERT_ID.tar" -C $DESTINATION_PATH/$USER/$CERT_ID .
