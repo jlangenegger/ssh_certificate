@@ -2,6 +2,7 @@
 USER=''
 KEYNUM='1'
 DURATION='1'
+FILE=''
 
 # flie names of the certifiactes
 PATH_TO_CERTIFICATES='../'
@@ -11,16 +12,17 @@ HOST_CERTIFICATE='host_ca'
 DESTINATION_PATH='/home/ca1'
 
 print_usage() {
-    echo "gen_client_cert [-u git_user] [-k key_number_in_git] [-d duration_of_certificates_in_days]"
+    echo "gen_client_cert [-u git_user] [-f file] [-k key_number_in_git] [-d duration_of_certificates_in_days]"
 }
 
-while getopts u:d:k:h option
+while getopts u:d:k:f:h option
 do
 case "${option}"
 in
 u) USER=${OPTARG} ;;
 d) DURATION=${OPTARG} ;;
 k) KEYNUM=${OPTARG} ;;
+f) FILE=${OPTARG} ;;
 h) print_usage; 
    exit 1 ;;
 *) print_usage; 
@@ -29,24 +31,30 @@ esac
 done
 
 if [ "$USER" == "" ]; then 
-    echo "provide git user!"
+    print_usage
     exit 1;
 fi
 
 # prepare variables
 CERT_ID="$USER-$(date +%Y_%m_%d_%H_%M)"
 
-# load ssh key from github
-wget -q -O $CERT_ID https://github.com/$USER.keys | sed -n $KEYNUM'p'
+# load certificate from file or git
+if [ "$FILE" == "" ]; then
+    # load ssh key from github
+    wget -q -O $CERT_ID https://github.com/$USER.keys | sed -n $KEYNUM'p'
+else
+    # load ssh key from file
+    echo `cat $FILE` >> $CERT_ID
+fi
 
 # sign key with USER_CERTIFICATE
 ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $USER -n root -V +$DURATION'd' $CERT_ID
+ssh-keygen -L -f $CERT_ID-cert.pub
 
 # generate installation script for client
 echo "#!/bin/bash
-cp $CERT_ID-cert.pub ~/.ssh
-cp $HOST_CERTIFICATE.pub ~/.ssh
-echo \"@cert-authority *.netdef.org \`cat ~/.ssh/$HOST_CERTIFICATE.pub\`\" >> ~/.ssh/known_hosts
+cp $CERT_ID-cert.pub ~/.ssh/id_rsa-cert.pub
+echo \"@cert-authority *.netdef.org \`cat $HOST_CERTIFICATE.pub\`\" >> ~/.ssh/known_hosts
 echo \"To apply certificate: RESTART SSH DAEMON!\"" > install_user_certificate.sh
 
 
