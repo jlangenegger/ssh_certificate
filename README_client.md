@@ -5,11 +5,7 @@ Do do so there are two options:
 1) Use the provided script `install_user_certificate.sh`. This scripts installs the certifacte automatically for the user that is logged-in.
 2) Install the certificate manually. The steps can be found right below.
 
----
-**NOTE**
-
-To apply the changes you need to manualy restart the ssh deamon!
----
+**To apply the changes you need to manualy restart the ssh deamon!**
 
 ### manually tell the SSH daemon about the certificate.
 There are two different options to tell the daemon about the certificate: `global` or `user based`.
