@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e # exit on any error
+
 USER=''
 KEYNUM='1'
 DURATION='1'
@@ -53,9 +56,31 @@ ssh-keygen -L -f $CERT_ID-cert.pub
 
 # generate installation script for client
 echo "#!/bin/bash
-cp $CERT_ID-cert.pub ~/.ssh/id_rsa-cert.pub
-echo \"@cert-authority *.netdef.org \`cat $HOST_CERTIFICATE.pub\`\" >> ~/.ssh/known_hosts
-echo \"To apply certificate: RESTART SSH DAEMON!\"" > install_user_certificate.sh
+
+set -e # exit on any error
+
+CERT_ID=\"$CERT_ID-cert.pub\"
+PATH_CERT=\"\$HOME/.ssh/id_rsa-cert.pub\"
+PATH_KNOWN_HOSTS=\"\$HOME/.ssh/known_hosts\"
+
+echo -e \"Enter file in which to save the key (\$PATH_CERT): \\c\"
+read maininput
+if [ \"\$maininput\" != \"\" ]; then
+    PATH_CERT=\$maininput
+fi
+
+echo -e \"Path to know_hosts file (\$PATH_KNOWN_HOSTS): \\c\"
+read maininput
+if [ \"\$maininput\" != \"\" ]; then
+    PATH_KNOWN_HOSTS=\$maininput
+fi
+
+cp \$CERT_ID \$PATH_CERT
+echo \"@cert-authority *.netdef.org \`cat $HOST_CERTIFICATE.pub\`\">>\"\$PATH_KNOWN_HOSTS\"
+
+echo \"To apply certificate: RESTART SSH DAEMON!\"
+
+" > install_user_certificate.sh
 
 
 
