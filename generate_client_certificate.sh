@@ -63,6 +63,7 @@ CERT_ID=\"$CERT_ID-cert.pub\"
 PATH_CERT=\"\$HOME/.ssh/id_rsa-cert.pub\"
 PATH_KNOWN_HOSTS=\"\$HOME/.ssh/known_hosts\"
 
+echo "To work properly the SSH certificate must have the same name as the private/public key with the additional ending -cert.pub"
 echo -e \"Enter file in which to save the key (\$PATH_CERT): \\c\"
 read maininput
 if [ \"\$maininput\" != \"\" ]; then
