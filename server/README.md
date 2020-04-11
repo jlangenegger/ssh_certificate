@@ -40,12 +40,12 @@ HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub
 ```
 
 ### TrustedUserCAKeys
-This forces the server to trust all certifactes the are signed with the user_ca key.  
-Copy the user_ca.pub to `root@server:/etc/ssh/user_ca.pub`  
-Add the config lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the user_ca.pub key.  
+This forces the server to trust all certifactes the are signed with the client_ca key.  
+Copy the client_ca.pub to `root@server:/etc/ssh/client_ca.pub`  
+Add the config lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the client_ca.pub key.  
 ```bash
 ### User CA certificate
-TrustedUserCAKeys /etc/ssh/user_ca.pub
+TrustedUserCAKeys /etc/ssh/client_ca.pub
 ```
 
 ## Principals

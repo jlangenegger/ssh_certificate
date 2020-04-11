@@ -9,7 +9,7 @@ FILE=''
 
 # flie names of the certifiactes
 PATH_TO_CERTIFICATES='../'
-USER_CERTIFICATE='user_ca'
+USER_CERTIFICATE='client_ca'
 HOST_CERTIFICATE='host_ca'
 
 DESTINATION_PATH='/home/ca1'
