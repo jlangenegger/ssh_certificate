@@ -61,9 +61,6 @@ else
     exit 1;
 fi
 
-echo $CERT_ID
-echo $PRINCIPALS
-
 # sign key with USER_CERTIFICATE
 ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $CERT_ID -n "$PRINCIPALS" -V +$DURATION'd' $CERT_ID
 ssh-keygen -L -f $CERT_ID-cert.pub
@@ -112,6 +109,6 @@ tar -cf "$DESTINATION_PATH/$CERT_ID.tar" -C "$DESTINATION_PATH/$CERT_ID" .
 # clean up
 rm -rf $DESTINATION_PATH/$CERT_ID
 rm install_user_certificate.sh
-rm $CERT_ID
+rm $CERT_ID*
 
 echo -e "\nThe certificate can be found here: $DESTINATION_PATH/$CERT_ID.tar\n"
