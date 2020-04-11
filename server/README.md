@@ -47,3 +47,19 @@ Add the config lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon a
 ### User CA certificate
 TrustedUserCAKeys /etc/ssh/user_ca.pub
 ```
+
+## Principals
+Now, we'll configure one of our servers to accept only certain principals. Do do so, add this line to `/etc/ssh/sshd_config`
+```bash
+### Auth Principals
+AuthorizedPrincipalsFile /etc/ssh/auth_principals/%u
+```
+Populate the principals file:
+```bash
+[root@server:~]# mkdir /etc/ssh/auth_principals
+[root@server:~]# echo -e 'server.netdef.org\nroot-everywhere' > /etc/ssh/auth_principals/root
+```
+This allows to all users to loggin as root that have either `server.netdef.org` or `root-everywhere` specified in the list of principals within their certificate.
+
+## Principals
+** Finally restart SSH to apply all the changes! **
