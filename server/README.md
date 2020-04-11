@@ -61,5 +61,5 @@ Populate the principals file:
 ```
 This allows to all users to loggin as root that have either `server.netdef.org` or `root-everywhere` specified in the list of principals within their certificate.
 
-## Principals
-** Finally restart SSH to apply all the changes! **
+## Restart SSH
+**Finally restart SSH to apply all the changes!**
