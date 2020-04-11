@@ -28,7 +28,7 @@ g) USER=${OPTARG} ;;
 f) FILE=${OPTARG} ;;
 I) CERT_ID=${OPTARG} ;;
 V) DURATION=${OPTARG} ;;
-n) principals=${OPTARG} ;;
+n) PRINCIPALS=${OPTARG} ;;
 h) print_usage; 
    exit 1 ;;
 *) print_usage; 
@@ -48,7 +48,7 @@ if [ "$USER" != "" ]; then
 
 elif [ $FILE != "" ]; then
     # check if CERT_ID was provided
-    if [ ( "$CERT_ID" == "" ) ]; then
+    if [ "$CERT_ID" == "" ]; then
         print_usage
         exit 1;
     fi
@@ -61,12 +61,15 @@ else
     exit 1;
 fi
 
+echo $CERT_ID
+echo $PRINCIPALS
 
 # sign key with USER_CERTIFICATE
-ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $CERT_ID -n $PRINCIPALS -V +$DURATION'd' $CERT_ID
+ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $CERT_ID -n "$PRINCIPALS" -V +$DURATION'd' $CERT_ID
 ssh-keygen -L -f $CERT_ID-cert.pub
 
 # generate installation script for client
+# echo "To work properly the SSH certificate must have the same name as the private/public key with the additional ending -cert.pub"
 echo "#!/bin/bash
 
 set -e # exit on any error
@@ -75,8 +78,7 @@ CERT_ID=\"$CERT_ID-cert.pub\"
 PATH_CERT=\"\$HOME/.ssh/id_rsa-cert.pub\"
 PATH_KNOWN_HOSTS=\"\$HOME/.ssh/known_hosts\"
 
-echo "To work properly the SSH certificate must have the same name as the private/public key with the additional ending -cert.pub"
-echo -e \"Enter file in which to save the key (\$PATH_CERT): \\c\"
+echo -e \"Enter file in which to save the certificate (\$PATH_CERT): \\c\"
 read maininput
 if [ \"\$maininput\" != \"\" ]; then
     PATH_CERT=\$maininput
@@ -102,12 +104,14 @@ mkdir -p $DESTINATION_PATH/$CERT_ID
 cp "$PATH_TO_CERTIFICATES/$HOST_CERTIFICATE.pub" $DESTINATION_PATH/$CERT_ID
 cp "install_user_certificate.sh" $DESTINATION_PATH/$CERT_ID
 cp $CERT_ID-cert.pub $DESTINATION_PATH//$CERT_ID
-cp "README_client.md" "$DESTINATION_PATH/$CERT_ID/README.md"
+cp "../client/README.md" "$DESTINATION_PATH/$CERT_ID/README.md"
 
 # tar certificate as well as the host public key and script to install the key
-tar -cf "$DESTINATION_PATH/$CERT_ID.tar" -C "$DESTINATION_PAT/$CERT_ID" .
+tar -cf "$DESTINATION_PATH/$CERT_ID.tar" -C "$DESTINATION_PATH/$CERT_ID" .
 
 # clean up
 rm -rf $DESTINATION_PATH/$CERT_ID
 rm install_user_certificate.sh
 rm $CERT_ID
+
+echo -e "\nThe certificate can be found here: $DESTINATION_PATH/$CERT_ID.tar\n"
