@@ -59,7 +59,9 @@ Populate the principals file:
 [root@server:~]# mkdir /etc/ssh/auth_principals
 [root@server:~]# echo -e 'server.netdef.org\nroot-everywhere' > /etc/ssh/auth_principals/root
 ```
-This allows to all users to loggin as root that have either `server.netdef.org` or `root-everywhere` specified in the list of principals within their certificate.
+This allows to all users to loggin as root that have either `server.netdef.org` or `root-everywhere` specified in the list of principals within their certificate.  
+
+You can control access to any local user by creating those files under `/etc/ssh/auth_principals`.
 
 ## Restart SSH
 **Finally restart SSH to apply all the changes!**
