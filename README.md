@@ -11,7 +11,7 @@ Certificate-based SSH authentication is superior to SSH keys in many ways:
 
 
 ## Setup
-For the purposes of this document, let’s consider three systems:
+For the purposes of this repository, let’s consider three systems:
 * Certification Authority
   * System name “ca.netdef.org“
   * Will host our Certification Authority

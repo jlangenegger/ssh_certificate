@@ -1,7 +1,7 @@
 # Server setup
 
 ## Certificate-based SSH authentication
-For the purposes of that repository, let’s consider three systems:
+For the purposes of this repository, let’s consider three systems:
 * Certification Authority
   * System name “ca.netdef.org“
   * Will host our Certification Authority
