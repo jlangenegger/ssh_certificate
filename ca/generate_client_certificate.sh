@@ -2,30 +2,33 @@
 
 set -e # exit on any error
 
-USER=''
-KEYNUM='1'
-DURATION='1'
-FILE=''
-
 # flie names of the certifiactes
-PATH_TO_CERTIFICATES='../'
+PATH_TO_CERTIFICATES='/etc/ssh_ca/'
 USER_CERTIFICATE='client_ca'
 HOST_CERTIFICATE='host_ca'
 
 DESTINATION_PATH='/home/ca1'
 
+# user input
+USER=''
+FILE=''
+CERT_ID=''
+DURATION='0'
+PRINCIPALS=''
+
 print_usage() {
-    echo "gen_client_cert [-u git_user] [-f file] [-k key_number_in_git] [-d duration_of_certificates_in_days]"
+    echo "gen_client_cert [-g git_user] [-f file] [-I cert_id] [-V duration_of_certificates_in_days] [-n principals]"
 }
 
-while getopts u:d:k:f:h option
+while getopts g:f:I:V:n:h option
 do
 case "${option}"
 in
-u) USER=${OPTARG} ;;
-d) DURATION=${OPTARG} ;;
-k) KEYNUM=${OPTARG} ;;
+g) USER=${OPTARG} ;;
 f) FILE=${OPTARG} ;;
+I) CERT_ID=${OPTARG} ;;
+V) DURATION=${OPTARG} ;;
+n) principals=${OPTARG} ;;
 h) print_usage; 
    exit 1 ;;
 *) print_usage; 
@@ -33,25 +36,34 @@ h) print_usage;
 esac
 done
 
-if [ "$USER" == "" ]; then 
+# generate CERT_ID if not provided
+
+# load certificate from file or git
+if [ "$USER" != "" ]; then
+    # create CERT_ID
+    CERT_ID="$USER-$(date +%Y_%m_%d_%H_%M)"
+    
+    # load ssh key from github
+    wget -q -O $CERT_ID https://github.com/$USER.keys | sed -n $KEYNUM'p'
+
+elif [ $FILE != "" ]; then
+    # check if CERT_ID was provided
+    if [ ( "$CERT_ID" == "" ) ]; then
+        print_usage
+        exit 1;
+    fi
+
+    # load ssh key from file
+    echo `cat $FILE` >> $CERT_ID
+else
+    # exit if neither git or file was given
     print_usage
     exit 1;
 fi
 
-# prepare variables
-CERT_ID="$USER-$(date +%Y_%m_%d_%H_%M)"
-
-# load certificate from file or git
-if [ "$FILE" == "" ]; then
-    # load ssh key from github
-    wget -q -O $CERT_ID https://github.com/$USER.keys | sed -n $KEYNUM'p'
-else
-    # load ssh key from file
-    echo `cat $FILE` >> $CERT_ID
-fi
 
 # sign key with USER_CERTIFICATE
-ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $USER -n root -V +$DURATION'd' $CERT_ID
+ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $CERT_ID -n $PRINCIPALS -V +$DURATION'd' $CERT_ID
 ssh-keygen -L -f $CERT_ID-cert.pub
 
 # generate installation script for client
@@ -86,16 +98,16 @@ echo \"To apply certificate: RESTART SSH DAEMON!\"
 
 
 # copy all the necessary files to a folder to tar
-mkdir -p $DESTINATION_PATH/$USER/$CERT_ID
-cp "$PATH_TO_CERTIFICATES/$HOST_CERTIFICATE.pub" $DESTINATION_PATH/$USER/$CERT_ID
-cp "install_user_certificate.sh" $DESTINATION_PATH/$USER/$CERT_ID
-cp $CERT_ID-cert.pub $DESTINATION_PATH/$USER/$CERT_ID
-cp "README_client.md" "$DESTINATION_PATH/$USER/$CERT_ID/README.md"
+mkdir -p $DESTINATION_PATH/$CERT_ID
+cp "$PATH_TO_CERTIFICATES/$HOST_CERTIFICATE.pub" $DESTINATION_PATH/$CERT_ID
+cp "install_user_certificate.sh" $DESTINATION_PATH/$CERT_ID
+cp $CERT_ID-cert.pub $DESTINATION_PATH//$CERT_ID
+cp "README_client.md" "$DESTINATION_PATH/$CERT_ID/README.md"
 
 # tar certificate as well as the host public key and script to install the key
-tar -cf "$DESTINATION_PATH/$USER/$CERT_ID.tar" -C $DESTINATION_PATH/$USER/$CERT_ID .
+tar -cf "$DESTINATION_PATH/$CERT_ID.tar" -C "$DESTINATION_PAT/$CERT_ID" .
 
 # clean up
-rm -rf $DESTINATION_PATH/$USER/$CERT_ID
+rm -rf $DESTINATION_PATH/$CERT_ID
 rm install_user_certificate.sh
-rm $USER*
+rm $CERT_ID

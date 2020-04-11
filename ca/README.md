@@ -1,4 +1,4 @@
-## CA Setup
+# CA Setup
 
 ## Certificate-based SSH authentication
 For the purposes of this repository, let’s consider three systems:
@@ -82,6 +82,6 @@ The scripts does have the following options:
   * Per default a certificate is valid for 7 days.
   * Having 0 as a validity period means that the certificate is valid forever.
 * -n
-  * This flag restricts the certificate to a list of pricipals.
+  * This flag restricts the certificate to a list of pricipals that the client is allowd to log in.
 
 The output of `generate_client_certificate.sh` is a .tar archive that contains the certificate as well as an install script for the client and the host_ca.pub key that is used to authanticate servers from the client side. It is stored at `/home/ca1/`.
