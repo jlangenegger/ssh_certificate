@@ -1,32 +1,33 @@
 #!/bin/bash
 
-set -e # exit on any error
-
-# flie names of the certifiactes
-PATH_TO_CERTIFICATES='/etc/ssh_ca/'
-USER_CERTIFICATE='client_ca'
-HOST_CERTIFICATE='host_ca'
+################################################################################
+# global variables
+################################################################################
+# settings
+PATH_TO_CERTIFICATES='/etc/ssh_ca'
+CLIENT_CERTIFICATES=( 'client_ca-1' 'client_ca-2' )
+HOST_CERTIFICATES=( 'host_ca-1' 'host_ca-2' )
 
 DESTINATION_PATH='/home/ca1'
 
 # user input
-USER=''
-FILE=''
-CERT_ID=''
-DURATION='0'
+GIT_USER=''
+DURATION='1W'
 PRINCIPALS=''
+FILE=''
 
 print_usage() {
-    echo "gen_client_cert [-g git_user] [-f file] [-I cert_id] [-V duration_of_certificates_in_days] [-n principals]"
+    echo "gen_client_cert [-g git_user] [-f file] [-V duration_of_certificates_in_days] [-n principals]"
 }
 
-while getopts g:f:I:V:n:h option
+set -e # exit on any error
+
+while getopts g:f:V:n:h option
 do
 case "${option}"
 in
-g) USER=${OPTARG} ;;
+g) GIT_USER=${OPTARG} ;;
 f) FILE=${OPTARG} ;;
-I) CERT_ID=${OPTARG} ;;
 V) DURATION=${OPTARG} ;;
 n) PRINCIPALS=${OPTARG} ;;
 h) print_usage; 
@@ -36,92 +37,120 @@ h) print_usage;
 esac
 done
 
-# generate CERT_ID if not provided
-
-# load certificate from file or git
-if [ "$USER" != "" ]; then
-    # create CERT_ID
-    if [ "$CERT_ID" == "" ]; then
-        CERT_ID="$USER-$(date +%Y_%m_%d_%H_%M)"
-    fi
-    
-    # load ssh key from github
-    wget -q -O $CERT_ID https://github.com/$USER.keys
-
-elif [ $FILE != "" ]; then
-    # check if CERT_ID was provided
-    if [ "$CERT_ID" == "" ]; then
-        print_usage
-        exit 1;
-    fi
-
-    # load ssh key from file
-    CERT_ID="$CERT_ID-$(date +%Y_%m_%d_%H_%M)"
-    cp "$FILE" "$CERT_ID"
-else
-    # exit if neither git or file was given
+# check user input
+LOADFILE=0
+if [ "$GIT_USER" == "" ]; then
     print_usage
     exit 1;
 fi
-
-KEYNUM=0
-while read line; do
-  # store key line 
-  CERT_ID_NUM="$CERT_ID-$KEYNUM"
-  echo "$line" >> $CERT_ID_NUM
-  
-  # generate certificate 
-  ssh-keygen -s "$PATH_TO_CERTIFICATES/$USER_CERTIFICATE" -I $CERT_ID_NUM -n "$PRINCIPALS" -V +$DURATION'd' "$CERT_ID_NUM"
-  ssh-keygen -L -f "$CERT_ID_NUM-cert.pub"
-  
-  # add key num
-  KEYNUM=$(( $KEYNUM + 1 ))
-
-done < $CERT_ID
-
-# generate installation script for client
-echo "#!/bin/bash
-
-set -e # exit on any error
-
-CERT_ID=$CERT_ID
-PATH_CERT=\"\$HOME/.ssh/id_rsa-cert.pub\"
-PATH_KNOWN_HOSTS=\"\$HOME/.ssh/known_hosts\"
-
-echo -e \"Enter file in which to save the certificate (\$PATH_CERT): \\c\"
-read maininput
-if [ \"\$maininput\" != \"\" ]; then
-    PATH_CERT=\$maininput
+if [ "$FILE" != "" ]; then
+    LOADFILE=1
 fi
 
+################################################################################
+# prepare files
+################################################################################
+# create Certificate ID
+CERT_ID="$GIT_USER-$(date +%s)"
+WORK="$CERT_ID-tmp"
+KEYS="keys.pub"
+
+mkdir $WORK # is used to store intermediate files
+cd $WORK
+
+mkdir tar # is used to copy all relevant file to
+
+echo "#!/bin/bash
+set -e # exit on any error
+
+PATH_SSH=\"\$HOME/.ssh\"
+PATH_CERTIFICATES=\"\$PATH_SSH/netdef\"
+PATH_KNOWN_HOSTS=\"\$PATH_SSH/known_hosts\"
+PATH_CONFIG=\"\$PATH_SSH/config\"
+
+# path to certifiacte folder
+echo -e \"Enter folder in which to save the certificates (\$PATH_CERTIFICATES): \\c\"
+read maininput
+if [ \"\$maininput\" != \"\" ]; then
+    PATH_CERTIFICATES=\$maininput
+fi
+
+# path to known hosts file
 echo -e \"Path to know_hosts file (\$PATH_KNOWN_HOSTS): \\c\"
 read maininput
 if [ \"\$maininput\" != \"\" ]; then
     PATH_KNOWN_HOSTS=\$maininput
 fi
 
-cp \$CERT_ID* \$PATH_CERT
-echo \"@cert-authority *.netdef.org \`cat $HOST_CERTIFICATE.pub\`\">>\"\$PATH_KNOWN_HOSTS\"
+# path to config file
+echo -e \"Path to config file (\$PATH_CONFIG): \\c\"
+read maininput
+if [ \"\$maininput\" != \"\" ]; then
+    PATH_CONFIG=\$maininput
+fi
 
-echo \"To apply certificate: RESTART SSH DAEMON!\"
 
-" > install_user_certificate.sh
+mkdir -p \$PATH_CERTIFICATES
+
+echo \"Host *.netdef.org\" >> \$PATH_CONFIG
+
+### client certificates
+
+### host certificates
+" > tar/install_user_certificate.sh
 
 
 
-# copy all the necessary files to a folder to tar
-mkdir -p $DESTINATION_PATH/$CERT_ID
-cp "$PATH_TO_CERTIFICATES/$HOST_CERTIFICATE.pub" $DESTINATION_PATH/$CERT_ID
-cp "install_user_certificate.sh" $DESTINATION_PATH/$CERT_ID
-cp *-cert.pub $DESTINATION_PATH/$CERT_ID
-cp "../client/README.md" "$DESTINATION_PATH/$CERT_ID/README.md"
+# laod certificates
+if [ $LOADFILE == 1 ]; then
+    cp $FILE $KEYS
+else
+    wget -q -O $KEYS https://github.com/$GIT_USER.keys
+fi
+
+KEYNUM=1
+while read line; do
+    CERT_ID_KEYNUM="$CERT_ID-$KEYNUM"
+    
+    CERTNUM=1
+    for CERT in ${CLIENT_CERTIFICATES[@]}; do
+        CERT_ID_KEYNUM_CERTNUM="$CERT_ID_KEYNUM-$CERTNUM"
+        
+        echo "$line" >> $CERT_ID_KEYNUM_CERTNUM
+        ssh-keygen -s "$PATH_TO_CERTIFICATES/$CERT" -I $CERT_ID_KEYNUM_CERTNUM -n "$PRINCIPALS" -V +$DURATION "$CERT_ID_KEYNUM_CERTNUM"
+
+        # copy signed certificate to tar folder
+        mv "$CERT_ID_KEYNUM_CERTNUM-cert.pub" tar/
+
+        LINE="chmod 400 \$PATH_CERTIFICATES/$CERT_ID_KEYNUM_CERTNUM-cert.pub"
+        sed -i "/^### client*/a $LINE" tar/install_user_certificate.sh
+
+        LINE="cp $CERT_ID_KEYNUM_CERTNUM-cert.pub \$PATH_CERTIFICATES"
+        sed -i "/^### client*/a $LINE" tar/install_user_certificate.sh
+        
+        LINE="echo \"    CertificateFile \$PATH_CERTIFICATES/$CERT_ID_KEYNUM_CERTNUM-cert.pub\" >> \$PATH_CONFIG"
+        sed -i "/^### client*/a $LINE" tar/install_user_certificate.sh
+        
+        CERTNUM=$(( $CERTNUM + 1 ))
+    done
+
+    KEYNUM=$(( $KEYNUM + 1 ))
+done < $KEYS
+
+# copy all hosts public key to tar file
+for CERT in ${HOST_CERTIFICATES[@]}; do
+    LINE="echo \"@cert-authority *.netdef.org `cat "$PATH_TO_CERTIFICATES/$CERT.pub"`\" >> \$PATH_KNOWN_HOSTS"
+    sed -i "/^### host*/a $LINE" tar/install_user_certificate.sh
+done
+
+cp "../../client/README.md" "tar/README.md"
+
 
 # tar certificate as well as the host public key and script to install the key
-tar -cf "$DESTINATION_PATH/$CERT_ID.tar" -C "$DESTINATION_PATH/$CERT_ID" .
+tar -cf "$DESTINATION_PATH/$CERT_ID.tar" -C "tar" .
 
-# clean up
-rm -rf $DESTINATION_PATH/$CERT_ID
-rm install_user_certificate.sh
-rm $CERT_ID*
+cd ..
+
+rm -r $WORK
 
 echo -e "\nThe certificates can be found here: $DESTINATION_PATH/$CERT_ID.tar\n"
