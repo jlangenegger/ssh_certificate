@@ -6,7 +6,7 @@ Let’s install some tools:
 apt-get install yubikey-personalization yubico-piv-tool opensc-pkcs11 pcscd
 ```
 
-## change default pins and mgt key of yubikey
+## change default pins and management key of yubikey
 Then prepare the PIV applet in the YubiKey NEO.
 ```bash
 yubikey_id=ca1_host
@@ -30,12 +30,15 @@ openssl genrsa -out ssh-$yubikey_id-ca-key.pem 2048
 openssl req -new -x509 -batch -key ssh-$yubikey_id-ca-key.pem -out ssh-$yubikey_id-ca-crt.pem
 ```
 
+## import keys to yubikey
 You import the key and certificate to the PIV applet as follows:
 ```bash
 yubico-piv-tool -k $key -a import-key -s 9c < ssh-$yubikey_id-ca-key.pem
 yubico-piv-tool -k $key -a import-certificate -s 9c < ssh-$yubikey_id-ca-crt.pem
 ```
-Extract the public-key for the CA:
+
+## extract public key
+Extract the public key for the CA:
 ```bash
 gnu=arm-linux-gnueabihf # used for raspberry
 gnu=x86_64-linux-gnu # used for debian
@@ -43,6 +46,7 @@ gnu=x86_64-linux-gnu # used for debian
 ssh-keygen -D /usr/lib/$gnu/opensc-pkcs11.so -e > ssh-$yubikey_id-ca-key.pub
 ```
 
+## sign hosts public key
 Sign some host keys using the CA, and to configure the hosts' sshd to use them.
 ```bash
 gnu=arm-linux-gnueabihf # used for raspberry
