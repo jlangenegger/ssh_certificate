@@ -1,4 +1,4 @@
-# CA Setup
+# Certificate Authority
 For the purposes of this repository, let’s consider three systems:
 * Certification Authority
   * System name “ca.netdef.org“
@@ -26,8 +26,8 @@ The scripts does have the following options:
 
 The output of `generate_client_certificate.sh` is a .tar archive that contains the certificate, the public key that is used to authenticate servers as well as an instruction to install the certificate on the client's machine. It is stored at `/home/ca1/`.
 
-
-# Prepare Yubikey
+# Prepare CA
+## Prepare Yubikey
 ### install libraries that are later used
 Let’s install some tools:
 ```bash
@@ -74,7 +74,7 @@ ARCH_GNU=x86_64-linux-gnu # used for debian
 ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -e > ssh-ca-$YUBIKEYNUM-key.pub
 ```
 
-# Sign server's RSA key
+## Sign server's RSA key
 ```bash
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
@@ -108,7 +108,7 @@ Options explanation:
   * The path to the host RSA public key to sign.
   * Our signed host key certificate will be /etc/ssh-ca/ssh_host_rsa_key-cert.pub.
 
-# Sign client's RSA key
+## Sign client's RSA key
 ```bash
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
