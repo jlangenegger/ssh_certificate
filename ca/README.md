@@ -35,7 +35,7 @@ yubico-piv-tool -k $key -a change-puk -P 12345678 -N $puk
 ```
 
 ### generate RSA private keys for SSH Host CA
-Then generate a RSA private key for the SSH Host CA, and generate a dummy X.509 certificate for that key. The only use for the X.509 certificate is to make PIV/PKCS#11 happy — they want to be able to extract the public-key from the smartcard, and do that through the X.509 certificate.
+Then generate a RSA private key for the SSH Host CA, and generate a dummy X.509 certificate for that key. The only use for the X.509 certificate is to make PIV/PKCS#11 happy. They want to be able to extract the public-key from the smartcard, and do that through the X.509 certificate.
 
 ```bash
 openssl genrsa -out ssh-ca-$YUBIKEYNUM-key.pem 2048
@@ -52,18 +52,18 @@ yubico-piv-tool -k $key -a import-certificate -s 9c < ssh-ca-$YUBIKEYNUM-cert.pe
 ### extract public key
 Extract the public key for the CA:
 ```bash
-gnu=arm-linux-gnueabihf # used for raspberry
-gnu=x86_64-linux-gnu # used for debian
+ARCH_GNU=arm-linux-gnueabihf # used for raspberry
+ARCH_GNU=x86_64-linux-gnu # used for debian
 
-ssh-keygen -D /usr/lib/$gnu/opensc-pkcs11.so -e > ssh-ca-$YUBIKEYNUM-key.pub
+ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -e > ssh-ca-$YUBIKEYNUM-key.pub
 ```
 
-## sign server's RSA key
+# Sign server's RSA key
 ```bash
-gnu=arm-linux-gnueabihf # used for raspberry
-gnu=x86_64-linux-gnu # used for debian
+ARCH_GNU=arm-linux-gnueabihf # used for raspberry
+ARCH_GNU=x86_64-linux-gnu # used for debian
 
-ssh-keygen  -D /usr/lib/$gnu/opensc-pkcs11.so
+ssh-keygen  -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so
             -s ssh-ca-$YUBIKEYNUM-key.pub
             -I server_name \
             -h \
@@ -92,12 +92,12 @@ Options explanation:
   * The path to the host RSA public key to sign.
   * Our signed host key certificate will be /etc/ssh-ca/ssh_host_rsa_key-cert.pub.
 
-## sign client's RSA key
+# Sign client's RSA key
 ```bash
-gnu=arm-linux-gnueabihf # used for raspberry
-gnu=x86_64-linux-gnu # used for debian
+ARCH_GNU=arm-linux-gnueabihf # used for raspberry
+ARCH_GNU=x86_64-linux-gnu # used for debian
 
-ssh-keygen  -D /usr/lib/$gnu/opensc-pkcs11.so
+ssh-keygen  -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so
             -s ssh-ca-$YUBIKEYNUM-key.pub
             -I client_name \
             -n root \
