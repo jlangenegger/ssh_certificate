@@ -3,14 +3,16 @@
 ################################################################################
 # global variables
 ################################################################################
-# settings
+SCRIPT=`realpath -s $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
 # gnu=x86_64-linux-gnu # used for debian
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 
 YUBIKEYNUM=1
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
-DESTINATION_PATH="/etc/ssh-ca"
-PATH_TO_README="/etc/ssh-ca/README.md"
+DESTINATION_PATH="$HOME"
+PATH_TO_README="$SCRIPTPATH/../client/README.md"
 
 # user input
 GIT_USER=''
@@ -56,7 +58,7 @@ fi
 CERT_ID="$GIT_USER-$(date +%s)"
 KEYS="$GIT_USER.keys"
 
-WORK="$CERT_ID"
+WORK=$SCRIPTPATH/../$CERT_ID
 mkdir $WORK # is used to store intermediate files
 mkdir $WORK/tar # is used to copy all relevant file to
 

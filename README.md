@@ -30,10 +30,10 @@ There are two different certificates.
   * This certificate is stored on the host and is provided to the client during the ssh connection establishment.
   * It is used on the client side to authenticate the host that the client tries to login.
 
-## configuration
+## Configuration
 To configure the client and the host, there are seperate READMEs:
-* (./host/README.md#Host Setup) 
-* (./client/README.md#Client Setup)
+* `./host/README.md`
+* `./client/README.md`
 
 # Help
 ### read certificate

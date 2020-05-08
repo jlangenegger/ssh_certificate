@@ -3,13 +3,16 @@
 ################################################################################
 # global variables
 ################################################################################
-ARCH_GNU=x86_64-linux-gnu # used for debian
+SCRIPT=`realpath -s $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+# ARCH_GNU=x86_64-linux-gnu # used for debian
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 
 YUBIKEYNUM=1
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
-DESTINATION_PATH="/etc/ssh-ca"
-PATH_TO_README="/etc/ssh-ca/README.md"
+DESTINATION_PATH="$HOME"
+PATH_TO_README="$SCRIPTPATH/../host/README.md"
 
 # user input
 HOST=''

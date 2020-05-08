@@ -24,7 +24,23 @@ The scripts does have the following options:
 * -n
   * This flag restricts the certificate to a list of pricipals that the client is allowd to log in.
 
-The output of `generate_client_certificate.sh` is a .tar archive that contains the certificate, the public key that is used to authenticate servers as well as an instruction to install the certificate on the client's machine. It is stored at `/home/ca1/`.
+The output of `generate_client_certificate.sh` is a .tar archive that contains the certificate, the public key that is used to authenticate servers as well as an instruction to install the certificate on the client's machine. It is stored in the home directory `$HOME`.
+
+## Sign hosts's public keys
+To sign host's public keys there is the script `generate_host_certificate.sh` to simplify the procedure.  
+The scripts does have the following options:
+* -I
+  * This takes the HOST_ID of the server.
+* -f
+  * The file that contains all the keys.
+* -V
+  * Add the validity period of a certificate in number of days.
+  * Per default a certificate is valid for 7 days.
+  * Having 0 as a validity period means that the certificate is valid forever.
+* -n
+  * This flag restricts the certificate to a list of pricipals that the host is known by.
+
+The output of `generate_hostt_certificate.sh` is the certificate `HOST_ID-cert.pub` that needs to be copied to the host. It is stored in the home directory `$HOME`.
 
 # Prepare CA
 ## Prepare Yubikey
@@ -74,7 +90,7 @@ ARCH_GNU=x86_64-linux-gnu # used for debian
 ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -e > ssh-ca-$YUBIKEYNUM-key.pub
 ```
 
-## Sign server's RSA key
+# Sign server's RSA key
 ```bash
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
@@ -108,7 +124,7 @@ Options explanation:
   * The path to the host RSA public key to sign.
   * Our signed host key certificate will be /etc/ssh-ca/ssh_host_rsa_key-cert.pub.
 
-## Sign client's RSA key
+# Sign client's RSA key
 ```bash
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
