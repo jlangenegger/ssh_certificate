@@ -10,8 +10,24 @@ For the purposes of this repository, let’s consider three systems:
   * System name "client.netdef.org"
   * Will function as an SSH client
 
-## Prepare Yubikey to be used for signing the certificates
+## Sign client's public keys
+To sign client's public keys there is the script `generate_client_certificate.sh` to simplify the procedure.  
+The scripts does have the following options:
+* -g
+  * This takes a github user name as an argument and generates a certificate for each key stored in github.
+* -f
+  * Instead of the github user name, one can provide a file that contains all the keys.
+* -V
+  * Add the validity period of a certificate in number of days.
+  * Per default a certificate is valid for 7 days.
+  * Having 0 as a validity period means that the certificate is valid forever.
+* -n
+  * This flag restricts the certificate to a list of pricipals that the client is allowd to log in.
 
+The output of `generate_client_certificate.sh` is a .tar archive that contains the certificate, the public key that is used to authenticate servers as well as an instruction to install the certificate on the client's machine. It is stored at `/home/ca1/`.
+
+
+# Prepare Yubikey
 ### install libraries that are later used
 Let’s install some tools:
 ```bash
