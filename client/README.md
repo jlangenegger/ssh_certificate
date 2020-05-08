@@ -31,28 +31,29 @@ The certificates can be installed for a single user or for all users in a machin
 * $KNOWNHOSTS=`$HOME/.ssh/known_hosts`
 
 ### global configuration paths
-* $CERTIFICATES=`/etc/ssh/netdef`
-* $CONFIG=`/etc/ssh/ssh_config`
-* $KNOWNHOSTS=`/etc/ssh/ssh_known_hosts`
+* `$CERTIFICATES=/etc/ssh/netdef`
+* `$CONFIG=/etc/ssh/ssh_config`
+* `$KNOWNHOSTS=/etc/ssh/ssh_known_hosts`
 
 ## Step 1 - copy all certificates to netdef folder
+Copy all certificates that can be found in this tar to the folder `$CERTIFICATES`.
 ```bash
-cd mkdir $CERTIFICATES
+mkdir -p $CERTIFICATES
 cp *cert.pub $CERTIFICATES
 ```
 
 ## Step 2 - edit the config file
-Add the following lines to $CONFIG.
+Add the following lines to `$CONFIG`. `$CERTIFICATES` must be replaced with the correct path to the folder.
 ```bash
 Host *netdef.org
-    CertificateFile $CERTIFICATES/helloworld-1588929718-1-cert.pub
-    CertificateFile $CERTIFICATES/helloworld-1588929718-2-cert.pub
+    CertificateFile `$CERTIFICATES`/helloworld-1588929718-1-cert.pub
+    CertificateFile `$CERTIFICATES`/helloworld-1588929718-2-cert.pub
     ...
-    CertificateFile $CERTIFICATES/helloworld-1588929718-N-cert.pub
+    CertificateFile `$CERTIFICATES`/helloworld-1588929718-N-cert.pub
 ```
 
 ## Step 3 - edit known hosts file.
-Add the following line to $KNOWNHOSTS where `echo netdef-X.pub` must be replaced with the public key stored in netdef-X.pub.
+Add the following line to `$KNOWNHOSTS` where `netdef-X.pub` must be replaced with the public key stored in netdef-X.pub.
 ```bash
-@cert-authority *.netdef.org `echo netdef-X.pub`
+@cert-authority *.netdef.org `netdef-X.pub`
 ```
