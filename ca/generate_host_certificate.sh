@@ -11,7 +11,7 @@ ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 
 YUBIKEYNUM=1
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
-DESTINATION_PATH="$HOME"
+DESTINATION_PATH="$HOME/signed_keys"
 PATH_TO_README="$SCRIPTPATH/../host/README.md"
 
 # user input
@@ -54,6 +54,8 @@ fi
 ################################################################################
 # sign keys
 ################################################################################
+mkdir -p $DESTINATION_PATH
+
 cp $FILE $HOST.pub
 ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -s $PATH_TO_CERTIFICATE -I $HOST -h -n $PRINCIPALS -V +$DURATION $HOST.pub
 

@@ -11,7 +11,7 @@ ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 
 YUBIKEYNUM=1
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
-DESTINATION_PATH="$HOME"
+DESTINATION_PATH="$HOME/signed_keys"
 PATH_TO_README="$SCRIPTPATH/../client/README.md"
 
 # user input
@@ -62,6 +62,7 @@ WORK=$SCRIPTPATH/../$CERT_ID
 mkdir $WORK # is used to store intermediate files
 mkdir $WORK/tar # is used to copy all relevant file to
 
+mkdir -p $DESTINATION_PATH
 
 ################################################################################
 # load keys
