@@ -7,7 +7,7 @@ SCRIPT=`realpath -s $0`
 SCRIPTPATH=`dirname $SCRIPT`
 
 # ARCH_GNU=arm-linux-gnueabihf # used for raspberry
-gnu=x86_64-linux-gnu # used for debian
+ARCH_GNU=x86_64-linux-gnu # used for debian
 
 YUBIKEYNUM=1
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
