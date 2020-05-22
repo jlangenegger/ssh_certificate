@@ -55,11 +55,11 @@ Then prepare the PIV applet in the YubiKey NEO.
 ```bash
 YUBIKEYNUM=0
 key=`dd if=/dev/random bs=1 count=24 2>/dev/null | hexdump -v -e '/1 "%02X"'`
-echo $key > yubikey$YUBIKEYNUM-key.txt
+echo $key > yubikey$YUBIKEYNUM.key
 pin=`dd if=/dev/random bs=1 count=6 2>/dev/null | hexdump -v -e '/1 "%u"'|cut -c1-6`
-echo $pin > yubikey$YUBIKEYNUM-pin.txt
+echo $pin > yubikey$YUBIKEYNUM.pin
 puk=`dd if=/dev/random bs=1 count=6 2>/dev/null | hexdump -v -e '/1 "%u"'|cut -c1-8`
-echo $puk > yubikey$YUBIKEYNUM-puk.txt
+echo $puk > yubikey$YUBIKEYNUM.puk
 
 yubico-piv-tool -a set-mgm-key -n $key
 yubico-piv-tool -k $key -a change-pin -P 123456 -N $pin
