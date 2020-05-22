@@ -53,13 +53,13 @@ apt-get install yubikey-personalization yubico-piv-tool opensc-pkcs11 pcscd
 ### change default pins and management key of yubikey
 Then prepare the PIV applet in the YubiKey NEO.
 ```bash
-YUBIKEYNUM=1
+YUBIKEYNUM=0
 key=`dd if=/dev/random bs=1 count=24 2>/dev/null | hexdump -v -e '/1 "%02X"'`
-echo $key > ssh-$YUBIKEYNUM-key.txt
+echo $key > yubikey$YUBIKEYNUM-key.txt
 pin=`dd if=/dev/random bs=1 count=6 2>/dev/null | hexdump -v -e '/1 "%u"'|cut -c1-6`
-echo $pin > ssh-$YUBIKEYNUM-pin.txt
+echo $pin > yubikey$YUBIKEYNUM-pin.txt
 puk=`dd if=/dev/random bs=1 count=6 2>/dev/null | hexdump -v -e '/1 "%u"'|cut -c1-8`
-echo $puk > ssh-$YUBIKEYNUM-puk.txt
+echo $puk > yubikey$YUBIKEYNUM-puk.txt
 
 yubico-piv-tool -a set-mgm-key -n $key
 yubico-piv-tool -k $key -a change-pin -P 123456 -N $pin
@@ -70,15 +70,15 @@ yubico-piv-tool -k $key -a change-puk -P 12345678 -N $puk
 Then generate a RSA private key for the SSH Host CA, and generate a dummy X.509 certificate for that key. The only use for the X.509 certificate is to make PIV/PKCS#11 happy. They want to be able to extract the public-key from the smartcard, and do that through the X.509 certificate.
 
 ```bash
-openssl genrsa -out ssh-ca-$YUBIKEYNUM-key.pem 2048
-openssl req -new -x509 -batch -key ssh-ca-$YUBIKEYNUM-key.pem -out ssh-ca-$YUBIKEYNUM-cert.pem
+openssl genrsa -out yubikey$YUBIKEYNUM-key.pem 2048
+openssl req -new -x509 -batch -key yubikey$YUBIKEYNUM-key.pem -out yubikey$YUBIKEYNUM-cert.pem
 ```
 
 ### import keys to yubikey
 You import the key and certificate to the PIV applet as follows:
 ```bash
-yubico-piv-tool -k $key -a import-key -s 9c < ssh-ca-$YUBIKEYNUM-key.pem
-yubico-piv-tool -k $key -a import-certificate -s 9c < ssh-ca-$YUBIKEYNUM-cert.pem
+yubico-piv-tool -k $key -a import-key -s 9c < yubikey$YUBIKEYNUM-key.pem
+yubico-piv-tool -k $key -a import-certificate -s 9c < yubikey$YUBIKEYNUM-cert.pem
 ```
 
 ### extract public key
@@ -87,7 +87,10 @@ Extract the public key for the CA:
 ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
 
-ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -e > ssh-ca-$YUBIKEYNUM-key.pub
+PATH_TO_CERTIFICATE="/etc/ssh-ca"
+
+mkdir -p $PATH_TO_CERTIFICATE
+ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -e > $PATH_TO_CERTIFICATE/yubikey$YUBIKEYNUM.pub
 ```
 
 # Sign server's RSA key
@@ -96,7 +99,7 @@ ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
 
 ssh-keygen  -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so
-            -s ssh-ca-$YUBIKEYNUM-key.pub
+            -s yubikey$YUBIKEYNUM-key.pub
             -I server_name \
             -h \
             -n server.netdef.org \
@@ -130,7 +133,7 @@ ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
 
 ssh-keygen  -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so
-            -s ssh-ca-$YUBIKEYNUM-key.pub
+            -s yubikey$YUBIKEYNUM-key.pub
             -I client_name \
             -n root \
             -V +24h \
@@ -155,3 +158,19 @@ Options explanation:
 * /etc/ssh_ca/id_rsa.pub
   * The name of the host RSA public key to sign.
   * Our signed host key (certificate) will be /etc/ssh_ca/ssh_host_rsa_key-cert.pub.
+
+# Troubleshooting
+## Reset PIV on Yubikey
+```bash
+yubico-piv-tool -averify-pin -P471112
+yubico-piv-tool -averify-pin -P471112
+yubico-piv-tool -averify-pin -P471112
+yubico-piv-tool -averify-pin -P471112
+yubico-piv-tool -achange-puk -P471112 -N6756789
+yubico-piv-tool -achange-puk -P471112 -N6756789
+yubico-piv-tool -achange-puk -P471112 -N6756789
+yubico-piv-tool -achange-puk -P471112 -N6756789
+yubico-piv-tool -areset
+yubico-piv-tool -aset-chuid
+yubico-piv-tool -aset-ccc
+```

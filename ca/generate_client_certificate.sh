@@ -9,7 +9,7 @@ SCRIPTPATH=`dirname $SCRIPT`
 # ARCH_GNU=arm-linux-gnueabihf # used for raspberry
 ARCH_GNU=x86_64-linux-gnu # used for debian
 
-YUBIKEYNUM=1
+YUBIKEYNUM=0
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
 DESTINATION_PATH="$HOME/signed_keys"
 PATH_TO_README="$SCRIPTPATH/../client/README.md"
