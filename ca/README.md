@@ -53,12 +53,11 @@ apt-get install autoconf automake libtool libssl-dev pkg-config check libpcsclit
 apt-get install git build-essential
 ```
 
-To install the 
+Install the tool:
 ```bash
 git clone https://github.com/Yubico/yubico-piv-tool.git
 
 cd yubico-piv-tool
-
 
 autoreconf --install
 ./configure  --disable-dependency-tracking
