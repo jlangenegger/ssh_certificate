@@ -3,15 +3,15 @@ There are two different things needed to setup the certificate authentification.
 * user certificates: 
 There are N user certifiactes, one for each public key provided for signing.
 ```bash
-helloworld-1588929718-1-cert.pub
-helloworld-1588929718-2-cert.pub
+helloworld-1234567890-1-cert.pub
+helloworld-1234567890-2-cert.pub
 ...
-helloworld-1588929718-N-cert.pub
+helloworld-1234567890-N-cert.pub
 ```
 * host certificate public key:
 There is one public key to authenticate servers.
 ```bash
-netdef-X.pub
+yubikeyX.pub
 ```
 
 ## tell the SSH daemon about the certificate.
@@ -26,14 +26,18 @@ To work correctly there are two things that need to be done:
 
 The certificates can be installed for a single user or for all users in a machine.
 #### user based configuration paths
-* SSH_CERTIFICATES=$HOME/.ssh/netdef
-* SSH_CONFIG=$HOME/.ssh/config
-* SSH_KNOWNHOSTS=$HOME/.ssh/known_hosts
+```bash
+SSH_CERTIFICATES=$HOME/.ssh/netdef
+SSH_CONFIG=$HOME/.ssh/config
+SSH_KNOWNHOSTS=$HOME/.ssh/known_hosts
+```
 
 #### global configuration paths
-* SSH_CERTIFICATES=/etc/ssh/netdef
-* SSH_CONFIG=/etc/ssh/ssh_config
-* SSH_KNOWNHOSTS=/etc/ssh/ssh_known_hosts
+```bash
+SSH_CERTIFICATES=/etc/ssh/netdef
+SSH_CONFIG=/etc/ssh/ssh_config
+SSH_KNOWNHOSTS=/etc/ssh/ssh_known_hosts
+```
 
 ### Step 1 - copy all certificates to netdef folder
 Copy all certificates that can be found in this tar to the folder `$SSH_CERTIFICATES`.
@@ -46,14 +50,14 @@ cp *cert.pub $SSH_CERTIFICATES
 Add the following lines to `$SSH_CONFIG`. `$SSH_CERTIFICATES` must be replaced with the correct path to the folder.
 ```bash
 Host *.netdef.org
-    CertificateFile `$SSH_CERTIFICATES`/helloworld-1588929718-1-cert.pub
-    CertificateFile `$SSH_CERTIFICATES`/helloworld-1588929718-2-cert.pub
+    CertificateFile `$SSH_CERTIFICATES`/helloworld-1234567890-1-cert.pub
+    CertificateFile `$SSH_CERTIFICATES`/helloworld-1234567890-2-cert.pub
     ...
-    CertificateFile `$SSH_CERTIFICATES`/helloworld-1588929718-N-cert.pub
+    CertificateFile `$SSH_CERTIFICATES`/helloworld-1234567890-N-cert.pub
 ```
 
 ### Step 3 - edit known hosts file.
-Add the following line to `$SSH_KNOWNHOSTS` where `netdef-X.pub` must be replaced with the public key stored in netdef-X.pub.
+Add the following line to `$SSH_KNOWNHOSTS` where `yubikeyX.pub` must be replaced with the public key stored in yubikeyX.pub.
 ```bash
-@cert-authority *.netdef.org `netdef-X.pub`
+@cert-authority *.netdef.org `yubikeyX.pub`
 ```

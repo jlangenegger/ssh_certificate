@@ -62,7 +62,7 @@ cd yubico-piv-tool
 autoreconf --install
 ./configure  --disable-dependency-tracking
 make
-sudo make install
+make install
 ```
 
 ### change default pins and management key of yubikey

@@ -1,7 +1,7 @@
 # Host Setup
 To enable certificate based login on a host, the public rsa key `ssh_host_rsa_key.pub` needs to be signed. The resulting certificate is called `ssh_host_rsa_key-cert.pub`. To enable ssh based login two things are required on the host:
 * host certificate: `ssh_host_rsa_key-cert.pub`
-* CA public key: `netdef-1.pub`
+* CA public key: `yubikeyX.pub`
 
 ## Step 1 - Host Certifiacte
 To tell the SSH daemon about the certificate add the following configuration lines to the file `/etc/ssh/sshd_config`. In addition copy the certificate to the specified location. The host sends this certificate to the client to identify itsself as a trusted host. 
@@ -14,7 +14,7 @@ HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub
 Add the following lines to the file `/etc/ssh/sshd_config` to tell the SSH daemon about the public key to verifiy client certificates. In addition copy the public key to the specified location. The host trusts all certifactes the are signed by our CA.
 ```bash
 ### User CA certificate
-TrustedUserCAKeys /etc/ssh/netdef-1.pub
+TrustedUserCAKeys /etc/ssh/yubikeyX.pub
 ```
 
 ## Step 3 - Principals
