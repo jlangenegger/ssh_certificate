@@ -3,13 +3,12 @@
 ################################################################################
 # global variables
 ################################################################################
+YUBIKEYNUM=0
+
 SCRIPT=`realpath -s $0`
 SCRIPTPATH=`dirname $SCRIPT`
 
-# ARCH_GNU=arm-linux-gnueabihf # used for raspberry
-ARCH_GNU=x86_64-linux-gnu # used for debian
-
-YUBIKEYNUM=0
+PATH_TO_YKCS11="/usr/local/lib/libykcs11.so"
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
 DESTINATION_PATH="$HOME/signed_keys"
 PATH_TO_README="$SCRIPTPATH/../host/README.md"
@@ -57,7 +56,7 @@ fi
 mkdir -p $DESTINATION_PATH
 
 cp $FILE $HOST.pub
-ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -s $PATH_TO_CERTIFICATE -I $HOST -h -n $PRINCIPALS -V +$DURATION $HOST.pub
+ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $HOST -h -n $PRINCIPALS -V +$DURATION $HOST.pub
 
 rm $HOST.pub
 mv $HOST-cert.pub $DESTINATION_PATH

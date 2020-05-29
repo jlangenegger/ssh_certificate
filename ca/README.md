@@ -45,9 +45,25 @@ The output of `generate_hostt_certificate.sh` is the certificate `HOST_ID-cert.p
 # Prepare CA
 ## Prepare Yubikey
 ### install libraries that are later used
-Let’s install some tools:
+To setup the yubikey the `yubico-piv-tool` is used. It musted be installed from source to work correctly. For the installation the following packages are needed:
 ```bash
-apt-get install yubikey-personalization yubico-piv-tool opensc-pkcs11 pcscd
+apt-get install autoconf automake libtool libssl-dev pkg-config check libpcsclite-dev gengetopt help2man
+
+# if not already installed
+apt-get install git build-essential
+```
+
+To install the 
+```bash
+git clone https://github.com/Yubico/yubico-piv-tool.git
+
+cd yubico-piv-tool
+
+
+autoreconf --install
+./configure  --disable-dependency-tracking
+make
+sudo make install
 ```
 
 ### change default pins and management key of yubikey
@@ -84,22 +100,20 @@ yubico-piv-tool -k $key -a import-certificate -s 9c < yubikey$YUBIKEYNUM-cert.pe
 ### extract public key
 Extract the public key for the CA:
 ```bash
-ARCH_GNU=arm-linux-gnueabihf # used for raspberry
-ARCH_GNU=x86_64-linux-gnu # used for debian
-
 PATH_TO_CERTIFICATE="/etc/ssh-ca"
+PATH_TO_YKCS11="/usr/local/lib/libykcs11.so"
 
 mkdir -p $PATH_TO_CERTIFICATE
-ssh-keygen -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so -e > $PATH_TO_CERTIFICATE/yubikey$YUBIKEYNUM.pub
+ssh-keygen -D $PATH_TO_YKCS11 -e > $PATH_TO_CERTIFICATE/yubikey$YUBIKEYNUM.pub
 ```
 
 # Sign server's RSA key
 ```bash
-ARCH_GNU=arm-linux-gnueabihf # used for raspberry
-ARCH_GNU=x86_64-linux-gnu # used for debian
+PATH_TO_CERTIFICATE="/etc/ssh-ca"
+PATH_TO_YKCS11="/usr/local/lib/libykcs11.so"
 
-ssh-keygen  -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so
-            -s yubikey$YUBIKEYNUM-key.pub
+ssh-keygen  -D $PATH_TO_YKCS11
+            -s $PATH_TO_CERTIFICATE/yubikey$YUBIKEYNUM.pub
             -I server_name \
             -h \
             -n server.netdef.org \
@@ -129,11 +143,11 @@ Options explanation:
 
 # Sign client's RSA key
 ```bash
-ARCH_GNU=arm-linux-gnueabihf # used for raspberry
-ARCH_GNU=x86_64-linux-gnu # used for debian
+PATH_TO_CERTIFICATE="/etc/ssh-ca"
+PATH_TO_YKCS11="/usr/local/lib/libykcs11.so"
 
-ssh-keygen  -D /usr/lib/$ARCH_GNU/opensc-pkcs11.so
-            -s yubikey$YUBIKEYNUM-key.pub
+ssh-keygen  -D $PATH_TO_YKCS11
+            -s $PATH_TO_CERTIFICATE/yubikey$YUBIKEYNUM.pub
             -I client_name \
             -n root \
             -V +24h \
