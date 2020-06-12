@@ -20,7 +20,7 @@ PRINCIPALS=''
 FILE=''
 
 print_usage() {
-    echo "gen_client_cert [-g git_user] [-f file] [-V validity_interval] [-n principals]"
+    echo "gen_client_cert -g git_user [-f file] -V validity_interval -n principals"
 }
 
 set -e # exit on any error
