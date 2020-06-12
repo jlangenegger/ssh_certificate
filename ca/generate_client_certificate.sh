@@ -15,7 +15,7 @@ PATH_TO_README="$SCRIPTPATH/../client/README.md"
 
 # user input
 GIT_USER=''
-DURATION='1W'
+DURATION='-1m:+1w'
 PRINCIPALS=''
 FILE=''
 

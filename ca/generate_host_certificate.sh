@@ -15,7 +15,7 @@ PATH_TO_README="$SCRIPTPATH/../host/README.md"
 
 # user input
 HOST=''
-DURATION='1W'
+DURATION='-1m:+1y'
 PRINCIPALS=''
 FILE=''
 
