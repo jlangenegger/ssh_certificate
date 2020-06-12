@@ -20,7 +20,7 @@ PRINCIPALS=''
 FILE=''
 
 print_usage() {
-    echo "gen_client_cert [-g git_user] [-f file] [-V duration_of_certificates_in_days] [-n principals]"
+    echo "gen_client_cert [-g git_user] [-f file] [-V validity_interval] [-n principals]"
 }
 
 set -e # exit on any error
@@ -83,7 +83,7 @@ while read line; do
 
     echo "$line" >> $WORK/$CERT_ID_KEYNUM
 
-    ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $CERT_ID_KEYNUM -n $PRINCIPALS -V +$DURATION $WORK/$CERT_ID_KEYNUM
+    ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $CERT_ID_KEYNUM -n $PRINCIPALS -V $DURATION $WORK/$CERT_ID_KEYNUM
     mv $WORK/$CERT_ID_KEYNUM-cert.pub $WORK/tar
 
     KEYNUM=$(( $KEYNUM + 1 ))

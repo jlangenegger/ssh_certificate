@@ -20,7 +20,7 @@ PRINCIPALS=''
 FILE=''
 
 print_usage() {
-    echo "generate_host_certificate [-I host_ID] [-f file] [-V duration_of_certificates_in_days] [-n principals]"
+    echo "generate_host_certificate -I host_ID -f file -V validity_interval -n principals"
 }
 
 set -e # exit on any error
@@ -56,9 +56,9 @@ fi
 mkdir -p $DESTINATION_PATH
 
 cp $FILE $HOST.pub
-ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $HOST -h -n $PRINCIPALS -V +$DURATION $HOST.pub
+ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $HOST -h -n $PRINCIPALS -V $DURATION $HOST.pub
 
 rm $HOST.pub
 mv $HOST-cert.pub $DESTINATION_PATH
 
-echo -e "\nThe certificates can be found here: $DESTINATION_PATH/$HOST\n"
+echo -e "\nThe certificates can be found here: $DESTINATION_PATH/$HOST-cert.pub\n"
