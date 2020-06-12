@@ -2,11 +2,11 @@
 
 Certificate-based SSH authentication is superior to SSH keys in many ways:
 
-* SSH certificates intrinsically possess avalidity period before and after which theyare invalid for providing authentication.
+* SSH certificates intrinsically possess a validity period before and after which they are invalid for providing authentication.
 * SSH certificates can be embedded with SSH restrictions that limit:
   * Who can use the certificate
   * The list of available SSH features (X11Forwarding, AgentForwarding, etc)
-  * Which SSH client machines can use thecertificate
+  * Which SSH client machines can use the certificate
   * Commands that can be run via SSH
 
 ## Setup
