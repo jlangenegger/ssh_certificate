@@ -9,4 +9,4 @@ Certificate-based SSH authentication is superior to SSH keys in many ways:
   * Which SSH client machines can use the certificate
   * Commands that can be run via SSH
 
-**The documentation for the installation can be found on [wiki.netdef.org](https://wiki.netdef.org/display/NET/Certificate-based+SSH+authentication).**
+**The documentation can be found on [wiki.netdef.org](https://wiki.netdef.org/display/NET/Certificate-based+SSH+authentication).**
