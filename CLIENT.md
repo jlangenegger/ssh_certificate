@@ -23,7 +23,7 @@ cp *cert.pub $SSH_CERTIFICATES
 ```
 
 # Step 3 - Edit the config file
-Add the following lines to '$SSH_CONFIG'. The name of the certificate as well as '$SSH_CERTIFICATES' must be replaced with the correct file name and the correct path to the folder respectively.
+Add the following lines to '$SSH_CONFIG'. The name of the certificate 'helloworld-1234567890-X-cert.pub' as well as '$SSH_CERTIFICATES' must be replaced with the correct file name and the correct path to the folder respectively.
 ```bash
 Host *.netdef.org
     CertificateFile `$SSH_CERTIFICATES`/helloworld-1234567890-1-cert.pub
