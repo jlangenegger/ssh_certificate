@@ -90,7 +90,6 @@ while read line; do
 done < $WORK/$KEYS
 
 # copy the public key and README.md to tar
-cp $PATH_TO_CERTIFICATE $WORK/tar/netdef-$YUBIKEYNUM.pub
 cp $PATH_TO_README $WORK/tar/README.md
 
 ################################################################################
