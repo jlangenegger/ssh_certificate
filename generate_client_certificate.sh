@@ -11,7 +11,7 @@ SCRIPTPATH=`dirname $SCRIPT`
 PATH_TO_YKCS11="/usr/local/lib/libykcs11.so"
 PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey$YUBIKEYNUM.pub"
 DESTINATION_PATH="$HOME/signed_keys"
-PATH_TO_README="$SCRIPTPATH/../client/README.md"
+PATH_TO_README="$SCRIPTPATH/CLIENT.md"
 
 # user input
 GIT_USER=''
@@ -91,7 +91,7 @@ done < $WORK/$KEYS
 
 # copy the public key and README.md to tar
 cp $PATH_TO_CERTIFICATE $WORK/tar/netdef-$YUBIKEYNUM.pub
-cp $PATH_TO_README $WORK/tar
+cp $PATH_TO_README $WORK/tar/README.md
 
 ################################################################################
 # tar certificates, public key and README and do clean up
