@@ -15,12 +15,22 @@ PATH_TO_README="$SCRIPTPATH/CLIENT.md"
 
 # user input
 GIT_USER=''
-DURATION='-1m:+1w'
+DURATION='-24h:+1w'
 PRINCIPALS=''
 FILE=''
 
 print_usage() {
     echo "gen_client_cert -g git_user [-f file] -V validity_interval -n principals"
+}
+
+function check_periode {
+    if ! [[ "$DURATION" == *":"* ]]; then
+        if [[ "$DURATION" == *"+"* ]]; then
+            DURATION="-24h:$DURATION"
+        else
+            DURATION="-24h:+$DURATION"
+        fi
+    fi
 }
 
 set -e # exit on any error
@@ -42,22 +52,50 @@ done
 
 # check user input
 LOADFILE=0
+check_periode # format duration input
+
 if [ "$GIT_USER" == "" ]; then
-    print_usage
-    exit 1;
+    echo -n "Enter username for Github: "
+    read GIT_USER
+    if [ "$PRINCIPALS" == "" ]; then
+        echo -n "Enter principals: "
+    else
+        echo -n "Enter principals ($PRINCIPALS): "
+    fi
+    read PRINCIPALS
+    echo -n "Enter validity period ($DURATION): "
+    read DURATION_USER_INPUT
+    if ! [[ "$DUR_IN" == "" ]]; then
+        DURATION=$DURATION_USER_INPUT
+    fi 
+
 fi
+
+if [ "$PRINCIPALS" == "" ]; then
+    echo -n "Enter principals: "
+    read PRINCIPALS
+    echo -n "Enter validity period ($DURATION): "
+    read DURATION_USER_INPUT
+    if ! [[ "$DUR_IN" == "" ]]; then
+        DURATION=$DURATION_USER_INPUT
+    fi 
+fi
+
 if [ "$FILE" != "" ]; then
     LOADFILE=1
 fi
 
+check_periode # format duration input
 ################################################################################
 # preparations
 ################################################################################
 # create Certificate ID
-CERT_ID="$GIT_USER-$(date +%s)"
+CERT_ID="$GIT_USER"
 KEYS="$GIT_USER.keys"
+INFOS="$GIT_USER.infos"
 
 WORK=$SCRIPTPATH/../$CERT_ID
+rm -rf $WORK 
 mkdir $WORK # is used to store intermediate files
 mkdir $WORK/tar # is used to copy all relevant file to
 
@@ -74,19 +112,37 @@ else
 fi
 
 ################################################################################
+# print additional infos
+################################################################################
+if [ "$FILE" == "" ]; then
+    wget -q -O $WORK/$GIT_USER "https://api.github.com/users/$GIT_USER"
+    GIT_USER_NAME=`cat $WORK/$GIT_USER | jq -r '.name'`
+    if [ "$GIT_USER_NAME" == "null" ]; then
+        GIT_USER_NAME="-"
+    fi
+    GIT_USER_COMPANY=`cat $WORK/$GIT_USER | jq -r '.company'`
+    if [ "$GIT_USER_COMPANY" == "null" ]; then
+        GIT_USER_COMPANY="-"
+    fi
+    GIT_USER_LOCATION=`cat $WORK/$GIT_USER | jq -r '.location'`
+    if [ "$GIT_USER_LOCATION" == "null" ]; then
+        GIT_USER_LOCATION="-"
+    fi
+fi
+echo "$GIT_USER: $GIT_USER_NAME, $GIT_USER_COMPANY, $GIT_USER_LOCATION"
+
+################################################################################
 # sign keys
 ################################################################################
 # iterate through all keys and sign them
-KEYNUM=1
 while read line; do
-    CERT_ID_KEYNUM="$CERT_ID-$KEYNUM"
+    KEY_SINGLE="SSH_KEY"
+    echo "$line" > $WORK/$KEY_SINGLE
 
-    echo "$line" >> $WORK/$CERT_ID_KEYNUM
+    ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $CERT_ID -n $PRINCIPALS -V $DURATION $WORK/$KEY_SINGLE
 
-    ssh-keygen -D $PATH_TO_YKCS11 -s $PATH_TO_CERTIFICATE -I $CERT_ID_KEYNUM -n $PRINCIPALS -V $DURATION $WORK/$CERT_ID_KEYNUM
-    mv $WORK/$CERT_ID_KEYNUM-cert.pub $WORK/tar
+    cat $WORK/$KEY_SINGLE-cert.pub >>  $WORK/tar/NETDEF-cert.pub
 
-    KEYNUM=$(( $KEYNUM + 1 ))
 done < $WORK/$KEYS
 
 # copy the public key and README.md to tar
