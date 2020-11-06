@@ -7,7 +7,7 @@ SCRIPT=`realpath -s $0`
 SCRIPTPATH=`dirname $SCRIPT`
 
 PATH_TO_YKCS11="/usr/local/lib/libykcs11.so"
-PATH_TO_CERTIFICATE="/etc/ssh-ca/yubikey.pub"
+PATH_TO_CERTIFICATE="/etc/ssh/yubikey.pub"
 DESTINATION_PATH="$HOME/signed_keys"
 PATH_TO_README="$SCRIPTPATH/CLIENT.md"
 
